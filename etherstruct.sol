@@ -3,7 +3,7 @@ pragma solidity ^0.4.16;
 contract owned {
 	address public owner;
 
-    constructor() public {
+	constructor() public {
 		owner = msg.sender;
 	}
 
@@ -20,14 +20,14 @@ contract owned {
 }
 
 contract EtherStruct is owned {
-	struct Block {
+	struct Cube {
 		address owner;
-		uint value;
+		uint lockedFunds;
 		uint style;
 		uint metadata;
 	}
 
-	Block[][][] worldspace;
+	Cube[][][] worldspace;
 	uint public worldLimitX;
 	uint public worldLimitY;
 	uint public worldLimitZ;
@@ -39,8 +39,33 @@ contract EtherStruct is owned {
 	}
 
 	function increaseWorldLimit(uint x, uint y, uint z) external onlyOwner {
-       worldLimitX = x > worldLimitX ? x : worldLimitX;
-	   worldLimitY = y > worldLimitY ? y : worldLimitY;
-	   worldLimitZ = z > worldLimitZ ? z : worldLimitZ;
-    }
+		// Ensure we can't shrink the world to make cubes inaccessible
+		require(x >= worldLimitX && y >= worldLimitY && z >= worldLimitZ);
+
+		// Set the new world limit
+		worldLimitX = x;
+		worldLimitY = y;
+		worldLimitZ = z;
+	}
+
+	function placeCube(uint x, uint y, uint z, uint style, uint metadata) external payable onlyOwner {
+		// Ensure the new cube is within bounds
+		require(x < worldLimitX && y < worldLimitY && z < worldLimitZ);
+
+		// Ensure the request is exceeding the previously locked value
+		require(msg.value > worldspace[x][y][z].lockedFunds);
+
+		returnLockedFunds(worldspace[x][y][z]);
+
+		worldspace[x][y][z] = Cube({
+			owner: msg.sender,
+			lockedFunds: msg.value,
+			style: style,
+			metadata: metadata
+		});
+	}
+
+	function returnLockedFunds(Cube cube) internal {
+		cube.owner.transfer(cube.lockedFunds);
+	}
 }
