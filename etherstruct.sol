@@ -48,14 +48,15 @@ contract EtherStruct is owned {
 		worldLimitZ = newWorldLimitZ;
 	}
 
-	function placeCube(uint x, uint y, uint z, uint style, uint metadata) external payable onlyOwner {
+	function placeCube(uint x, uint y, uint z, uint style, uint metadata) external payable {
 		// Ensure the new cube is within bounds
 		require(x < worldLimitX && y < worldLimitY && z < worldLimitZ);
 
 		// Ensure the request is exceeding the previously locked value
 		require(msg.value > worldspace[x][y][z].lockedFunds);
 
-		returnLockedFunds(worldspace[x][y][z]);
+		if(worldspace[x][y][z].owner != 0x0)
+			returnLockedFunds(worldspace[x][y][z]);
 
 		worldspace[x][y][z] = Cube({
 			owner: msg.sender,
