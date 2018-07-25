@@ -32,20 +32,20 @@ contract EtherStruct is owned {
 	uint public worldLimitY;
 	uint public worldLimitZ;
 
-	constructor(uint x, uint y, uint z) public {
-		worldLimitX = x;
-		worldLimitY = y;
-		worldLimitZ = z;
+	constructor(uint startingWorldLimitX, uint startingWorldLimitY, uint startingWorldLimitZ) public {
+		worldLimitX = startingWorldLimitX;
+		worldLimitY = startingWorldLimitY;
+		worldLimitZ = startingWorldLimitZ;
 	}
 
-	function increaseWorldLimit(uint x, uint y, uint z) external onlyOwner {
+	function increaseWorldLimit(uint newWorldLimitX, uint newWorldLimitY, uint newWorldLimitZ) external onlyOwner {
 		// Ensure we can't shrink the world to make cubes inaccessible
-		require(x >= worldLimitX && y >= worldLimitY && z >= worldLimitZ);
+		require(newWorldLimitX >= worldLimitX && newWorldLimitY >= worldLimitY && newWorldLimitZ >= worldLimitZ);
 
 		// Set the new world limit
-		worldLimitX = x;
-		worldLimitY = y;
-		worldLimitZ = z;
+		worldLimitX = newWorldLimitX;
+		worldLimitY = newWorldLimitY;
+		worldLimitZ = newWorldLimitZ;
 	}
 
 	function placeCube(uint x, uint y, uint z, uint style, uint metadata) external payable onlyOwner {
