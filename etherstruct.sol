@@ -27,7 +27,7 @@ contract EtherStruct is owned {
 		uint metadata;
 	}
 
-	Cube[][][] worldspace;
+	Cube[][][] public worldspace;
 	uint public worldLimitX;
 	uint public worldLimitY;
 	uint public worldLimitZ;
