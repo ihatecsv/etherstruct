@@ -7,10 +7,10 @@ contract owned {
 		owner = msg.sender;
 	}
 
-    modifier onlyOwner {
-        require(msg.sender == owner, "Only the owner can call this function.");
-        _;
-    }
+	modifier onlyOwner {
+		require(msg.sender == owner, "Only the owner can call this function.");
+		_;
+	}
 
 	function transferOwnership(address newOwner) external onlyOwner {
 		if (newOwner != address(0)) {
@@ -38,7 +38,7 @@ contract EtherStruct is owned {
 		worldLimitZ = z;
 	}
 
-	function increaseWorldLimit(uint x, uint y, uint z) public onlyOwner {
+	function increaseWorldLimit(uint x, uint y, uint z) external onlyOwner {
        worldLimitX = x > worldLimitX ? x : worldLimitX;
 	   worldLimitY = y > worldLimitY ? y : worldLimitY;
 	   worldLimitZ = z > worldLimitZ ? z : worldLimitZ;
