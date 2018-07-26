@@ -8,7 +8,7 @@ contract owned {
 	}
 
 	modifier onlyOwner {
-		require(msg.sender == owner, "Only the owner can call this function.");
+		require(msg.sender == owner, "You are not the owner.");
 		_;
 	}
 
@@ -51,7 +51,7 @@ contract EtherStruct is owned {
 	function increaseWorldCorner(uint64 newWorldCornerX, uint64 newWorldCornerY, uint64 newWorldCornerZ) external onlyOwner {
 
 		// Ensure we can't shrink the world to make cubes inaccessible
-		require(newWorldCornerX >= worldCornerX && newWorldCornerY >= worldCornerY && newWorldCornerZ >= worldCornerZ);
+		require(newWorldCornerX >= worldCornerX && newWorldCornerY >= worldCornerY && newWorldCornerZ >= worldCornerZ, "You can't shrink the world.");
 
 		// Set the new world limit
 		worldCornerX = newWorldCornerX;
@@ -62,13 +62,13 @@ contract EtherStruct is owned {
 	function placeCube(uint64 x, uint64 y, uint64 z, uint style, uint metadata) external payable {
 
 		// Ensure the new cube is within bounds
-		require(x < worldCornerX && y < worldCornerY && z < worldCornerZ);
+		require(x < worldCornerX && y < worldCornerY && z < worldCornerZ, "Your cube is not within bounds.");
 
 		// Convert the coordinates to the packed location key
 		uint256 packedLocation = packLocation(x, y, z);
 
 		// Ensure the request is exceeding the previously locked value
-		require(msg.value > worldspace[packedLocation].lockedFunds);
+		require(msg.value > worldspace[packedLocation].lockedFunds, "You haven't exceeded the previously locked value.");
 		
 		// Don't send nothing to nobody
 		if(worldspace[packedLocation].owner != 0x0)
