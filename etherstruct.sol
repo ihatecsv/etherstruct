@@ -27,7 +27,7 @@ contract EtherStruct is owned {
 		uint metadata;
 	}
 
-	function packLocation (uint64 x, uint64 y, uint64 z) public pure returns(uint256){
+	function packLocation(uint64 x, uint64 y, uint64 z) public pure returns(uint256) {
 		uint256 sum;
 		sum += uint256(x) * (2**128);
 		sum += uint256(y) * (2**64);
