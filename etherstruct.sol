@@ -1,4 +1,5 @@
 pragma solidity ^0.4.16;
+pragma experimental ABIEncoderV2;
 
 contract owned {
 	address public owner;
@@ -27,38 +28,66 @@ contract EtherStruct is owned {
 		uint metadata;
 	}
 
-	Cube[][][] public worldspace;
-	uint public worldLimitX;
-	uint public worldLimitY;
-	uint public worldLimitZ;
-
-	constructor(uint startingWorldLimitX, uint startingWorldLimitY, uint startingWorldLimitZ) public {
-		worldLimitX = startingWorldLimitX;
-		worldLimitY = startingWorldLimitY;
-		worldLimitZ = startingWorldLimitZ;
+	struct Location {
+		uint64 x;
+		uint64 y;
+		uint64 z;
 	}
 
-	function increaseWorldLimit(uint newWorldLimitX, uint newWorldLimitY, uint newWorldLimitZ) external onlyOwner {
+	function unpackLocation (bytes24 packedLocation) internal pure returns(Location){
+		bytes8[3] memory x = [bytes8(0), 0, 0];
+		assembly {
+			mstore(x, packedLocation)
+			mstore(add(x, 56), packedLocation)
+			mstore(add(x, 112), packedLocation)
+		}
+		return Location({
+			x: uint64(x[0]),
+			y: uint64(x[1]),
+			z: uint64(x[2])
+		});
+	}
+
+	mapping(bytes24 => Cube) worldspace;
+	uint public worldCornerX;
+	uint public worldCornerY;
+	uint public worldCornerZ;
+
+	constructor(bytes24 packedLocation) public {
+		Location memory location = unpackLocation(packedLocation);
+
+		worldCornerX = location.x;
+		worldCornerY = location.y;
+		worldCornerZ = location.z;
+	}
+
+	function increaseWorldCorner(bytes24 packedLocation) external onlyOwner {
+		Location memory location = unpackLocation(packedLocation);
+
 		// Ensure we can't shrink the world to make cubes inaccessible
-		require(newWorldLimitX >= worldLimitX && newWorldLimitY >= worldLimitY && newWorldLimitZ >= worldLimitZ);
+		require(location.x >= worldCornerX && location.y >= worldCornerY && location.z >= worldCornerZ);
 
 		// Set the new world limit
-		worldLimitX = newWorldLimitX;
-		worldLimitY = newWorldLimitY;
-		worldLimitZ = newWorldLimitZ;
+		worldCornerX = location.x;
+		worldCornerY = location.y;
+		worldCornerZ = location.z;
 	}
 
-	function placeCube(uint x, uint y, uint z, uint style, uint metadata) external payable {
+	function placeCube(bytes24 packedLocation, uint style, uint metadata) external payable {
+		Location memory location = unpackLocation(packedLocation);
+
 		// Ensure the new cube is within bounds
-		require(x < worldLimitX && y < worldLimitY && z < worldLimitZ);
+		require(location.x < worldCornerX && location.y < worldCornerY && location.z < worldCornerZ);
+		
+		Cube memory existingCube = worldspace[packedLocation];
 
 		// Ensure the request is exceeding the previously locked value
-		require(msg.value > worldspace[x][y][z].lockedFunds);
+		require(msg.value > existingCube.lockedFunds);
 
-		if(worldspace[x][y][z].owner != 0x0)
-			returnLockedFunds(worldspace[x][y][z]);
+		if(existingCube.owner != 0x0)
+			returnLockedFunds(existingCube);
 
-		worldspace[x][y][z] = Cube({
+		worldspace[packedLocation] = Cube({
 			owner: msg.sender,
 			lockedFunds: msg.value,
 			style: style,
