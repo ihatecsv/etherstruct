@@ -57,7 +57,7 @@ window.addEventListener("load", function() {
 		texCanvasCtx.font = "30pt arial bold";
 		texCanvasCtx.fillText(cubeType, texCanvasSize/2, texCanvasSize/2);
 		texCanvasCtx.font = "15pt arial bold";
-		texCanvasCtx.fillText([x, y, z], 5, 5);
+		texCanvasCtx.fillText([x, y, z], 10, 15);
 
 		const mat = new THREE.MeshBasicMaterial({ map: new THREE.Texture(texCanvas), transparent: true });
 		mat.map.needsUpdate = true;
