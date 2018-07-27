@@ -1,6 +1,25 @@
+// world
+const gridSize = 10;
+const cubeGeometry = new THREE.BoxBufferGeometry(gridSize, gridSize, gridSize);
+
+const cubeGhostMaterial = new THREE.MeshBasicMaterial({
+	color: 0xff0000,
+	wireframe: true
+});
+
+const ghostObject = new THREE.Mesh(cubeGeometry, cubeGhostMaterial);
+ghostObject.visible = false;
+ghostObject.updateMatrix();
+
+window.addEventListener("click", function(){
+	if(ghostObject.visible){
+		alert([ghostObject.position.x/gridSize, ghostObject.position.y/gridSize, ghostObject.position.z/gridSize]);
+	}
+});
+
 window.addEventListener("load", function() {
 	if (typeof web3 !== 'undefined') {
-		var provider = web3.currentProvider;
+		const provider = web3.currentProvider;
 	} else {
 		console.log('No web3? You should consider trying MetaMask!');
 	}
@@ -37,6 +56,8 @@ window.addEventListener("load", function() {
 		texCanvasCtx.fillStyle = "#a00";
 		texCanvasCtx.font = "30pt arial bold";
 		texCanvasCtx.fillText(cubeType, texCanvasSize/2, texCanvasSize/2);
+		texCanvasCtx.font = "15pt arial bold";
+		texCanvasCtx.fillText([x, y, z], 5, 5);
 
 		const mat = new THREE.MeshBasicMaterial({ map: new THREE.Texture(texCanvas), transparent: true });
 		mat.map.needsUpdate = true;
@@ -53,21 +74,6 @@ window.addEventListener("load", function() {
 	}
 
 	var camera, controls, scene, renderer;
-
-	// world
-	const gridSize = 10;
-	const cubeGeometry = new THREE.BoxBufferGeometry(gridSize, gridSize, gridSize);
-
-	const cubeGhostMaterial = new THREE.MeshBasicMaterial({
-		color: 0xff0000,
-		wireframe: true
-	});
-
-	const ghostObject = new THREE.Mesh(cubeGeometry, cubeGhostMaterial);
-	ghostObject.position.x = -1337;
-	ghostObject.position.y = -1337;
-	ghostObject.position.z = -1337;
-	ghostObject.updateMatrix();
 
 	init();
 	//render(); // remove when using next line for animation loop (requestAnimationFrame)
@@ -109,7 +115,6 @@ window.addEventListener("load", function() {
 						mesh.position.y = y * gridSize;
 						mesh.position.z = z * gridSize;
 						mesh.updateMatrix();
-						mesh.matrixAutoUpdate = false;
 						scene.add(mesh);
 					});
 				}
@@ -138,15 +143,12 @@ window.addEventListener("load", function() {
 		render();
 	}
 	function render() {
+		ghostObject.visible = false;
 		raycaster.setFromCamera(mouse, camera);
-		ghostObject.position.x = -1337;
-		ghostObject.position.y = -1337;
-		ghostObject.position.z = -1337;
-		ghostObject.updateMatrix();
 		var intersects = raycaster.intersectObjects(scene.children);
 
 		const renderGhost = function(intersectPos, blockPos, val){
-			if(Math.abs(intersectPos[val] - Math.round(intersectPos[val])) < 0.0001){
+			if(Math.abs(intersectPos[val] - Math.round(intersectPos[val])) < 0.001){
 				const ghostPos = {x: blockPos.x, y: blockPos.y, z: blockPos.z};
 				let adjustment = 0;
 				if(blockPos[val] < intersectPos[val]){
@@ -155,16 +157,18 @@ window.addEventListener("load", function() {
 					adjustment -= gridSize;
 				}
 				ghostPos[val] = ghostPos[val] + adjustment;
+				if(ghostPos[val] < 0) return;
+				ghostObject.visible = true;
 				ghostObject.position.x = ghostPos.x;
 				ghostObject.position.y = ghostPos.y;
 				ghostObject.position.z = ghostPos.z;
 			}
 		}
 
-		if(intersects[0]){
-			renderGhost(intersects[0].point, intersects[0].object.position, "x");
-			renderGhost(intersects[0].point, intersects[0].object.position, "y");
-			renderGhost(intersects[0].point, intersects[0].object.position, "z");
+		for(let i = intersects.length - 1; i >= 0 ; i--){
+			renderGhost(intersects[i].point, intersects[i].object.position, "x");
+			renderGhost(intersects[i].point, intersects[i].object.position, "y");
+			renderGhost(intersects[i].point, intersects[i].object.position, "z");
 		}
 		//intersects[i].object.material.color.set(0xff0000);
 
