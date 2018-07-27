@@ -1,3 +1,5 @@
+//Note: this is pretty gross, cleaning it up as I go along!
+
 window.addEventListener("load", function() {
 	if (typeof web3 !== 'undefined') {
 		const provider = web3.currentProvider;
@@ -62,7 +64,7 @@ window.addEventListener("load", function() {
 		texCanvasCtx.fillText(web3.fromWei(cube.lockedFunds, "ether") + "Ξ", 72, 240);
 
 		texCanvasCtx.fillStyle = "#a00";
-    	texCanvasCtx.font = "16pt 'Lucida Console'";
+		texCanvasCtx.font = "16pt 'Lucida Console'";
 		texCanvasCtx.fillText("Cube style", 72, 280);
 		texCanvasCtx.font = "48pt 'Lucida Console'";
 		texCanvasCtx.fillText(cube.style, 72, 340);
@@ -70,7 +72,7 @@ window.addEventListener("load", function() {
 		texCanvasCtx.shadowBlur = 0;
 		texCanvasCtx.fillStyle = "#555";
 		texCanvasCtx.font = "11pt 'Lucida Console'";
-    	texCanvasCtx.fillText("Owner", 72, 420);
+		texCanvasCtx.fillText("Owner", 72, 420);
 		texCanvasCtx.fillText(cube.owner, 72, 440);
 
     	document.body.appendChild(texCanvas);
@@ -82,7 +84,7 @@ window.addEventListener("load", function() {
 	}
 
 	// world
-	const gridSize = 10;
+	const gridSize = 32;
 	const cubeGeometry = new THREE.BoxBufferGeometry(gridSize, gridSize, gridSize);
 
 	const cubeGhostMaterial = new THREE.MeshBasicMaterial({
