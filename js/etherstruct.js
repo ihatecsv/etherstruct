@@ -119,9 +119,9 @@ window.addEventListener("load", function() {
 
 		scene.add(ghostObject);
 
-		for(let x = 0; x < 4; x++){
-			for(let y = 0; y < 4; y++){
-				for(let z = 0; z < 4; z++){
+		for(let x = 0; x < 8; x++){
+			for(let y = 0; y < 8; y++){
+				for(let z = 0; z < 8; z++){
 					getCubeAt(x, y, z, function(err, cubeType){
 						if(err) return console.error(err);
 						if(cubeType == 0) return;
