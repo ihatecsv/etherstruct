@@ -1,21 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				margin: 0px;
-				background-color: #000000;
-				overflow: hidden;
-			}
-		</style>
-		<title>Etherstruct</title>
-	</head>
-	<body>
-		<script src="js/bignumber.min.js"></script>
-		<script src="js/three.min.js"></script>
-		<script src="js/OrbitControls.js"></script>
-		<script src="js/etherstruct.js"></script>
-	</body>
+
+<head>
+	<meta charset="utf8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<style>
+		body {
+			margin: 0px;
+			background-color: #000000;
+			overflow: hidden;
+		}
+	</style>
+	<title>Etherstruct</title>
+</head>
+
+<body>
+	<div class="modal fade" id="build-modal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="form-group">
+							<label for="bid-price">Bid price</label>
+							<div class="input-group mb-3">
+								<input id="bid-price" type="text" class="form-control" placeholder="0.005">
+								<div class="input-group-append">
+									<span class="input-group-text">ΞTH</span>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label>Coordinates</label>
+							<div class="form-row align-items-center">
+								<div class="col-auto">
+									<div class="input-group mb-2">
+										<div class="input-group-prepend">
+											<span class="input-group-text">X</span>
+										</div>
+										<input id="x-coord" type="text" class="form-control">
+									</div>
+								</div>
+								<div class="col-auto">
+									<div class="input-group mb-2">
+										<div class="input-group-prepend">
+											<span class="input-group-text">Y</span>
+										</div>
+										<input id="y-coord" type="text" class="form-control">
+									</div>
+								</div>
+								<div class="col-auto">
+									<div class="input-group mb-2">
+										<div class="input-group-prepend">
+											<span class="input-group-text">Z</span>
+										</div>
+										<input id="z-coord" type="text" class="form-control">
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="cube-style">Cube style</label>
+							<input id="cube-style" type="text" class="form-control" placeholder="1">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" id="close-button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="button" id="build-button" class="btn btn-primary">Build</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/bignumber.min.js"></script>
+	<script src="js/three.min.js"></script>
+	<script src="js/OrbitControls.js"></script>
+	<script src="js/etherstruct.js"></script>
+</body>
+
 </html>
