@@ -19,26 +19,61 @@ window.addEventListener("load", function() {
 	}
 
 	const getCubeAt = function(x, y, z, cb){
-		etherstruct.worldspace.call([packLocation(x, y, z)], function(err, data){
-			cb(err, data[2]);
+		const packedLocation = packLocation(x, y, z);
+		etherstruct.worldspace.call([packedLocation], function(err, data){
+			const cube = {
+				x: x,
+				y: y,
+				z: z,
+				owner: data[0],
+				lockedFunds: data[1],
+				style: data[2],
+				metadata: data[3],
+				packedLocation: packedLocation
+			};
+			cb(err, cube);
 		});
 	}
 
-	const createCubeMaterial = function(x, y, z, cubeType){
+	const createCubeMaterial = function(cube){
 		const texCanvas = document.createElement("canvas");
 		const texCanvasCtx = texCanvas.getContext("2d");
-		const texCanvasSize = 128;
+		const texCanvasSize = 512;
+		const texBorderSize = 64;
 
 		texCanvas.width = texCanvas.height = texCanvasSize;
 		texCanvasCtx.shadowColor = "#000";
 		texCanvasCtx.shadowBlur = 7;
 		texCanvasCtx.fillStyle = "#aaa";
 		texCanvasCtx.fillRect(0, 0, texCanvasSize, texCanvasSize);
+		texCanvasCtx.fillStyle = "#888";
+		texCanvasCtx.fillRect(texBorderSize, texBorderSize, texCanvasSize-(texBorderSize*2), texCanvasSize-(texBorderSize*2));
+
+		texCanvasCtx.fillStyle = "#00a";
+		texCanvasCtx.font = "16pt 'Lucida Console'";
+		texCanvasCtx.fillText("Location", 72, 80);
+		texCanvasCtx.font = "48pt 'Lucida Console'";
+		texCanvasCtx.fillText([cube.x, cube.y, cube.z], 72, 140);
+
+		texCanvasCtx.fillStyle = "#0a0";
+		texCanvasCtx.font = "16pt 'Lucida Console'";
+		texCanvasCtx.fillText("Locked value", 72, 180);
+		texCanvasCtx.font = "48pt 'Lucida Console'";
+		texCanvasCtx.fillText(web3.fromWei(cube.lockedFunds, "ether") + "Ξ", 72, 240);
+
 		texCanvasCtx.fillStyle = "#a00";
-		texCanvasCtx.font = "30pt arial bold";
-		texCanvasCtx.fillText(cubeType, texCanvasSize/2, texCanvasSize/2);
-		texCanvasCtx.font = "15pt arial bold";
-		texCanvasCtx.fillText([x, y, z], 10, 15);
+    	texCanvasCtx.font = "16pt 'Lucida Console'";
+		texCanvasCtx.fillText("Cube style", 72, 280);
+		texCanvasCtx.font = "48pt 'Lucida Console'";
+		texCanvasCtx.fillText(cube.style, 72, 340);
+
+		texCanvasCtx.shadowBlur = 0;
+		texCanvasCtx.fillStyle = "#555";
+		texCanvasCtx.font = "11pt 'Lucida Console'";
+    	texCanvasCtx.fillText("Owner", 72, 420);
+		texCanvasCtx.fillText(cube.owner, 72, 440);
+
+    	document.body.appendChild(texCanvas);
 
 		const mat = new THREE.MeshBasicMaterial({ map: new THREE.Texture(texCanvas), transparent: true });
 		mat.map.needsUpdate = true;
@@ -60,7 +95,7 @@ window.addEventListener("load", function() {
 	ghostObject.updateMatrix();
 
 	window.addEventListener("click", function(){
-		if(ghostObject.visible){
+		if(ghostObject.visible && !($('#build-modal').is(':visible'))){
 			const clickedBlock = {x: ghostObject.position.x/gridSize, y: ghostObject.position.y/gridSize, z: ghostObject.position.z/gridSize};
 			$("#x-coord").val(clickedBlock.x);
 			$("#y-coord").val(clickedBlock.y);
@@ -122,12 +157,12 @@ window.addEventListener("load", function() {
 		for(let x = 0; x < 8; x++){
 			for(let y = 0; y < 8; y++){
 				for(let z = 0; z < 8; z++){
-					getCubeAt(x, y, z, function(err, cubeType){
+					getCubeAt(x, y, z, function(err, cube){
 						if(err) return console.error(err);
-						if(cubeType == 0) return;
-						console.log("Placed " + cubeType + " at " + [x, y, z]);
+						if(cube.style == 0) return;
+						console.log("Placed " + cube.style + " at " + [cube.x, cube.y, cube.z]);
 
-						const cubeMaterial = createCubeMaterial(x, y, z, cubeType);
+						const cubeMaterial = createCubeMaterial(cube);
 						var mesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
 						mesh.position.x = x * gridSize;
 						mesh.position.y = y * gridSize;
