@@ -45,11 +45,12 @@ window.addEventListener("load", function() {
 
 		texCanvas.width = texCanvas.height = texCanvasSize;
 		texCanvasCtx.shadowColor = "#000";
-		texCanvasCtx.shadowBlur = 7;
 		texCanvasCtx.fillStyle = "#aaa";
 		texCanvasCtx.fillRect(0, 0, texCanvasSize, texCanvasSize);
 		texCanvasCtx.fillStyle = "#888";
 		texCanvasCtx.fillRect(texBorderSize, texBorderSize, texCanvasSize-(texBorderSize*2), texCanvasSize-(texBorderSize*2));
+
+		texCanvasCtx.shadowBlur = 7;
 
 		texCanvasCtx.fillStyle = "#00a";
 		texCanvasCtx.font = "16pt 'Lucida Console'";
@@ -84,17 +85,33 @@ window.addEventListener("load", function() {
 	}
 
 	// world
-	const gridSize = 32;
+	const gridSize = 16;
+	const bounds = 16;
 	const cubeGeometry = new THREE.BoxBufferGeometry(gridSize, gridSize, gridSize);
 
-	const cubeGhostMaterial = new THREE.MeshBasicMaterial({
-		color: 0xff0000,
-		wireframe: true
+	const ghostGeo = new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(gridSize, gridSize, gridSize));
+
+	const cubeGhostMaterial = new THREE.LineBasicMaterial({
+		color: 0xff0000
 	});
 
-	const ghostObject = new THREE.Mesh(cubeGeometry, cubeGhostMaterial);
+	const ghostObject = new THREE.LineSegments(ghostGeo, cubeGhostMaterial);
 	ghostObject.visible = false;
 	ghostObject.updateMatrix();
+
+	const borderMat = new THREE.LineBasicMaterial({
+		color: 0xff00ff
+	});
+
+	const borderGeo = new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(gridSize*bounds, gridSize*bounds, gridSize*bounds));
+
+	const border = new THREE.LineSegments(borderGeo, borderMat);
+	
+	border.position.x = ((gridSize*bounds)/2)-(gridSize/2);
+	border.position.y = ((gridSize*bounds)/2)-(gridSize/2);
+	border.position.z = ((gridSize*bounds)/2)-(gridSize/2);
+
+	border.updateMatrix();
 
 	window.addEventListener("click", function(){
 		if(ghostObject.visible && !($('#build-modal').is(':visible'))){
@@ -135,18 +152,18 @@ window.addEventListener("load", function() {
 	animate();
 	function init() {
 		scene = new THREE.Scene();
-		scene.background = new THREE.Color( 0xcccccc );
-		scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+		//scene.background = new THREE.Color( 0x000000 );
+		//scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
 		renderer = new THREE.WebGLRenderer( { antialias: true } );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		document.body.appendChild( renderer.domElement );
 		renderer.domElement.addEventListener("mousemove", onMouseMove);
 		camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-		camera.position.set( 400, 200, 0 );
+		camera.position.set((gridSize*bounds)*2 , (gridSize*bounds)*2 , (gridSize*bounds)*2 );
 		// controls
 		controls = new THREE.OrbitControls( camera, renderer.domElement );
-		//controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
+		controls.target.set((gridSize*bounds)/2 , (gridSize*bounds)/3, (gridSize*bounds)/2 );
 		controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
 		controls.dampingFactor = 0.25;
 		controls.screenSpacePanning = false;
@@ -155,6 +172,7 @@ window.addEventListener("load", function() {
 		controls.maxPolarAngle = Math.PI / 2;
 
 		scene.add(ghostObject);
+		scene.add(border);
 
 		for(let x = 0; x < 8; x++){
 			for(let y = 0; y < 8; y++){
@@ -199,8 +217,10 @@ window.addEventListener("load", function() {
 	}
 	function render() {
 		ghostObject.visible = false;
+		border.visible = false;
 		raycaster.setFromCamera(mouse, camera);
 		var intersects = raycaster.intersectObjects(scene.children);
+		border.visible = true;
 
 		const renderGhost = function(intersectPos, blockPos, val){
 			if(Math.abs(intersectPos[val] - Math.round(intersectPos[val])) < 0.001){
